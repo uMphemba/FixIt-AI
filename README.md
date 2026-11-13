@@ -1,6 +1,6 @@
 # FixIt AI
 
-FixIt AI is a troubleshooting application in development. This foundation accepts and saves a device problem description; it does not provide diagnoses or repair instructions yet.
+FixIt AI is a troubleshooting application in development. It saves a device problem description and can ask AI-generated follow-up questions and produce an uncertain assessment. Guided repair and account-based history are not implemented.
 
 ## Requirements
 
@@ -21,6 +21,18 @@ dotnet run
 ```
 
 Alternatively, supply `ConnectionStrings__FixItAI` as an environment variable. The API listens at `http://localhost:5080` in the development launch profile; Swagger is at `/swagger`. The frontend origin allowed by CORS defaults to `http://localhost:5173`; set `FrontendOrigin` if it differs. The API can start without a database connection, but submissions return 503 until the connection and migration are configured.
+
+### Neon
+
+The repository includes `neon.ts`. After authenticating and linking a Neon branch, `neon deploy` writes the branch credentials to the ignored root `.env.local` (or `.env` if already present). In Development, the API reads `DATABASE_URL`, `NEON_AI_GATEWAY_BASE_URL`, and `NEON_AI_GATEWAY_TOKEN` from that file, unless the same variables are already in the environment. The PostgreSQL URL takes precedence over `ConnectionStrings:FixItAI`; it is converted for Npgsql with TLS certificate and hostname verification. For non-development environments, supply these variables through the hosting environment's secret manager; the API does not load the file there. Never commit these files or publish the credentials.
+
+## Diagnostic provider
+
+When Neon gateway settings are present, the backend uses its OpenAI-compatible Responses endpoint with `gpt-5-mini` by default. Neon reports that gateway model calls require prepaid credits, including on the free plan. Otherwise, set `OPENAI_API_KEY` in the backend environment or .NET user secrets to use OpenAI directly with `gpt-4o-mini`. The browser never receives either credential. `OpenAI__Model` optionally selects a compatible model. The user is notified before device details and answers are sent to the AI service. Requests can incur provider charges.
+
+The backend protects a short-lived conversation ticket with ASP.NET Core Data Protection. Questions and answers are not saved to the database in this milestone, so an interrupted conversation must be restarted. Configure shared, durable Data Protection keys securely before using multiple instances or relying on ticket continuity across restarts.
+
+The app uses conservative prompts and basic hazard checks, but automated screening is not comprehensive and AI output can be wrong or unsafe. Do not rely on it for hazardous repair advice. The in-process rate limit is a development safeguard, not a substitute for authentication and production abuse controls.
 
 ## Frontend
 
