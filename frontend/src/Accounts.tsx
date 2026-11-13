@@ -1,27 +1,27 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
-import { authProviders, currentUser, getSession, googleSignInUrl, history, logout, type SavedSession } from './services/api'
+import { ApiError, authProviders, currentUser, getSession, googleSignInUrl, history, logout, type SavedSession } from './services/api'
 import type { DiagnosticResult } from './types'
 import DiagnosticFlow from './DiagnosticFlow'
 
-type Auth = { email: string | null; loading: boolean; refresh: () => Promise<void>; signOut: () => Promise<void> }
+type Auth = { email: string | null; loading: boolean; error: string; refresh: () => Promise<void>; signOut: () => Promise<void> }
 const Context = createContext<Auth | null>(null)
 export function useAuth() { const value = useContext(Context); if (!value) throw new Error('Auth provider missing'); return value }
 export function AuthProvider({children}: {children: React.ReactNode}) {
-  const [email, setEmail] = useState<string | null>(null), [loading, setLoading] = useState(true)
-  async function refresh() { try { setEmail((await currentUser()).email) } catch { setEmail(null) } finally { setLoading(false) } }
+  const [email, setEmail] = useState<string | null>(null), [loading, setLoading] = useState(true), [error, setError] = useState('')
+  async function refresh() { setError(''); try { setEmail((await currentUser()).email) } catch (e) { setEmail(null); if (!(e instanceof ApiError && e.status === 401)) setError('Unable to check your account. Check that the API is running and try again.') } finally { setLoading(false) } }
   async function signOut() { await logout(); setEmail(null) }
   useEffect(() => { void refresh() }, [])
-  return <Context.Provider value={{email, loading, refresh, signOut}}>{children}</Context.Provider>
+  return <Context.Provider value={{email, loading, error, refresh, signOut}}>{children}</Context.Provider>
 }
-export function RequireAccount({children}: {children: React.ReactNode}) { const {email, loading} = useAuth(); if (loading) return <main className="container not-found"><p>Checking your account…</p></main>; return email ? children : <Navigate to="/account" replace/> }
+export function RequireAccount({children}: {children: React.ReactNode}) { const {email, loading, error, refresh} = useAuth(); if (loading) return <main className="container not-found"><p>Checking your account…</p></main>; if (error) return <main className="container not-found"><p role="alert">{error}</p><button className="button primary" onClick={() => void refresh()}>Try again</button></main>; return email ? children : <Navigate to="/account" replace/> }
 export function Account() {
   const auth = useAuth()
   const [available, setAvailable] = useState<boolean | null>(null), [error, setError] = useState('')
   useEffect(() => { authProviders().then(x => setAvailable(x.google)).catch(() => setError('Cannot reach the sign-in service. Check that the API is running.')) }, [])
   if (auth.loading) return <main className="container not-found"><p>Checking your account…</p></main>
   if (auth.email) return <Navigate to="/history" replace/>
-  return <main className="form-page"><div className="account-wrap form-card"><span className="kicker">YOUR FIXIT AI ACCOUNT</span><h1>Welcome to FixIt AI</h1><p>Sign in with Google to save and revisit your troubleshooting sessions. FixIt AI does not collect a password.</p>{available ? <a className="button primary submit" href={googleSignInUrl()}>Continue with Google</a> : <p className="form-error" role="status">{error || (available === null ? 'Checking sign-in availability…' : 'Google sign-in is not configured yet.')}</p>}</div></main>
+  return <main className="form-page"><div className="account-wrap form-card"><span className="kicker">YOUR FIXIT AI ACCOUNT</span><h1>Welcome to FixIt AI</h1><p>Sign in with Google to save and revisit your troubleshooting sessions. FixIt AI does not collect a password.</p>{new URLSearchParams(window.location.search).get('signin') === 'failed' && <p className="form-error" role="alert">Sign-in could not be completed. Start again in the same browser.</p>}{available ? <a className="button primary submit" href={googleSignInUrl()}>Continue with Google</a> : <p className="form-error" role="status">{error || (available === null ? 'Checking sign-in availability…' : 'Google sign-in is not configured yet.')}</p>}</div></main>
 }
 export function History() {
   const [sessions, setSessions] = useState<SavedSession[] | null>(null), [error, setError] = useState('')

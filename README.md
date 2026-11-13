@@ -54,3 +54,5 @@ Create a Google OAuth **web application** client and register `http://localhost:
 Diagnostic results and guided-check progress are saved to a signed-in user's session. Follow-up questions and answers are not yet persisted, so an interrupted conversation before assessment must be restarted. No AI assessment is guaranteed, and generated checks require careful review; stop and seek professional help whenever a situation is hazardous or uncertain.
 
 Account setup, access isolation, and Google sign-in must be verified end-to-end against a migrated database and configured Google OAuth client before public use. Do not store sensitive personal information while verification remains incomplete.
+
+To run the focused account-isolation test from the repository root, use `dotnet test tests/FixItAI.Tests/FixItAI.Tests.csproj --configuration Release`. This test uses an in-memory database and does not verify PostgreSQL or Google sign-in end to end.

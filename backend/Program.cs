@@ -29,6 +29,12 @@ if (googleConfigured) builder.Services.AddAuthentication().AddGoogle(options => 
     options.ClientId = googleClientId!;
     options.ClientSecret = googleClientSecret!;
     options.SignInScheme = IdentityConstants.ExternalScheme;
+    options.Events.OnRemoteFailure = context => {
+        context.HandleResponse();
+        var frontend = builder.Configuration["FrontendOrigin"] ?? "http://localhost:5173";
+        context.Response.Redirect(frontend.TrimEnd('/') + "/account?signin=failed");
+        return Task.CompletedTask;
+    };
 });
 builder.Services.AddAuthorization();
 builder.Services.ConfigureApplicationCookie(options => {
