@@ -1,5 +1,5 @@
 import type { DiagnosticResult, FieldErrors, TroubleRequest } from '../types'
-const base = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5080').replace(/\/$/, '')
+const base = (import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? '' : 'http://localhost:5080')).replace(/\/$/, '')
 export class ApiError extends Error { constructor(message: string, public errors: FieldErrors = {}) { super(message) } }
 async function request(path: string, options?: RequestInit) {
   let response: Response

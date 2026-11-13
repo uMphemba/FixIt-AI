@@ -1,6 +1,6 @@
 # FixIt AI
 
-FixIt AI is a troubleshooting application in development. It saves a device problem description and can ask AI-generated follow-up questions and produce an uncertain assessment. Guided repair and account-based history are not implemented.
+FixIt AI is a troubleshooting application in development. It saves a device problem description, can ask AI-generated follow-up questions and produce an uncertain assessment, and presents suggested basic checks one at a time. Account-based history and component-level repair are not implemented.
 
 ## Requirements
 
@@ -45,6 +45,8 @@ Copy-Item .env.example .env.local
 npm run dev
 ```
 
-Open `http://localhost:5173`. `VITE_API_BASE_URL` sets the API origin and defaults to `http://localhost:5080`. The frontend configuration is public and must not contain secrets. Run `npm run build` for a production build and `dotnet build` in `backend` to build the API.
+Open the local URL printed by Vite (usually `http://localhost:5173`). The development server proxies `/api` to `http://localhost:5080`, including when Vite selects another port. Keep the backend running in the first terminal. If you previously set `VITE_API_BASE_URL` in `frontend/.env.local`, remove it or leave it blank to use the proxy. For separate deployments, set it to the API origin and configure the backend's `FrontendOrigin`. Frontend configuration is public and must not contain secrets. Run `npm run build` for a production build and `dotnet build` in `backend` to build the API. On Windows PowerShell, use `npm.cmd` in place of `npm` if script execution is blocked.
+
+Guided check progress is held in the current browser session only. It is not saved to history. No AI assessment is guaranteed, and generated checks require careful review; stop and seek professional help whenever a situation is hazardous or uncertain.
 
 This milestone has no authentication or history interface. Do not use it to store sensitive personal information or expose it publicly until identity, access control, and privacy protections are implemented.
