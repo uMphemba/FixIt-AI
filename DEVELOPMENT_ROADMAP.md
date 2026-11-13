@@ -17,12 +17,12 @@ The workspace began empty. Milestone 1 adds a React/TypeScript/Vite frontend and
 1. **Core foundation:** Implemented layout, device and symptom form, validation, API endpoints, PostgreSQL session model and migration. Builds, health, categories, validation, database-unavailable handling, and a Neon-backed submission were verified.
 2. **AI troubleshooting:** OpenAI Responses API integration, Neon AI Gateway support, protected short-lived question tickets, follow-up forms, structured results, basic safety stops, and provider error handling are implemented. The gateway returns 403 because the Neon account has no AI Gateway credits; a successful model response and end-to-end assessment remain unverified. Safety screening needs evaluation against a broad set of real-world hazards before deployment.
 3. **Guided repair:** Basic checks are presented individually with completion, solved/continue outcomes, and a safety stop. Progress is in-memory only. Guided checks use the existing AI assessment, which cannot be verified end-to-end until gateway access is enabled. Component-level repair is deliberately excluded.
-4. **Accounts and history:** Choose a justified authentication and persistence approach, save session progress and results, and enforce ownership of private records. Verify access isolation and session recovery.
+4. **Accounts and history:** Google OAuth and owner-scoped session history, results, and progress are implemented locally. The EF migration has been applied to Neon. End-to-end sign-in, session recovery, and access isolation still need verification. Existing anonymous sessions remain unowned. Follow-up answers before an assessment are not persisted.
 5. **Reliability and refinement:** Verify key journeys, accessibility, mobile layouts, validation, privacy, and safety. Remove unfinished UI and document the actual startup and configuration steps.
 
 ## Dependencies and decisions
 
-- Authentication has not yet been selected. Neon PostgreSQL is configured for local development.
+- Google OAuth client configuration is required; the accounts migration has been applied to Neon. End-to-end sign-in remains unverified.
 - AI Gateway requires credits and model access. A successful live model response has not been verified.
-- Persistent private history depends on storage and an appropriate identity mechanism.
+- Private history depends on Google OAuth configuration and migration, and requires end-to-end verification.
 - Work proceeds one milestone at a time; review the existing implementation and verify each milestone before starting the next.

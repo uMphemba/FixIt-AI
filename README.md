@@ -1,6 +1,6 @@
 # FixIt AI
 
-FixIt AI is a troubleshooting application in development. It saves a device problem description, can ask AI-generated follow-up questions and produce an uncertain assessment, and presents suggested basic checks one at a time. Account-based history and component-level repair are not implemented.
+FixIt AI is a troubleshooting application in development. It saves a device problem description, can ask AI-generated follow-up questions and produce an uncertain assessment, and presents suggested basic checks one at a time. Google sign-in and private history are in development; component-level repair is not implemented.
 
 ## Requirements
 
@@ -47,6 +47,10 @@ npm run dev
 
 Open the local URL printed by Vite (usually `http://localhost:5173`). The development server proxies `/api` to `http://localhost:5080`, including when Vite selects another port. Keep the backend running in the first terminal. If you previously set `VITE_API_BASE_URL` in `frontend/.env.local`, remove it or leave it blank to use the proxy. For separate deployments, set it to the API origin and configure the backend's `FrontendOrigin`. Frontend configuration is public and must not contain secrets. Run `npm run build` for a production build and `dotnet build` in `backend` to build the API. On Windows PowerShell, use `npm.cmd` in place of `npm` if script execution is blocked.
 
-Guided check progress is held in the current browser session only. It is not saved to history. No AI assessment is guaranteed, and generated checks require careful review; stop and seek professional help whenever a situation is hazardous or uncertain.
+## Google sign-in and history
 
-This milestone has no authentication or history interface. Do not use it to store sensitive personal information or expose it publicly until identity, access control, and privacy protections are implemented.
+Create a Google OAuth **web application** client and register `http://localhost:5080/signin-google` as an authorized redirect URI for local development. Store `Google:ClientId` and `Google:ClientSecret` in backend user secrets, or provide `Google__ClientId` and `Google__ClientSecret` in the backend environment. Never commit the client secret. Set `FrontendOrigin` for the actual frontend origin in production and register the production API's HTTPS `/signin-google` callback with Google. Apply the `AccountsAndHistory` migration before enabling account flows. The app stores a local Google account identifier and email for ownership, but no Google password. Existing anonymous sessions remain unowned and do not appear in a user's history.
+
+Diagnostic results and guided-check progress are saved to a signed-in user's session. Follow-up questions and answers are not yet persisted, so an interrupted conversation before assessment must be restarted. No AI assessment is guaranteed, and generated checks require careful review; stop and seek professional help whenever a situation is hazardous or uncertain.
+
+Account setup, access isolation, and Google sign-in must be verified end-to-end against a migrated database and configured Google OAuth client before public use. Do not store sensitive personal information while verification remains incomplete.

@@ -5,9 +5,10 @@ using FixItAI.Api.Services;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FixItAI.Api.Controllers;
-[ApiController, Route("api/diagnostics"), EnableRateLimiting("diagnostics")]
+[ApiController, Authorize, Route("api/diagnostics"), EnableRateLimiting("diagnostics")]
 public class DiagnosticsController(DiagnosticService service, IDataProtectionProvider protection) : ControllerBase
 {
     private readonly IDataProtector protector = protection.CreateProtector("FixItAI.DiagnosticTicket.v1");

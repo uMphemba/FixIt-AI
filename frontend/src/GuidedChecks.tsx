@@ -1,13 +1,16 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Check, ShieldAlert } from 'lucide-react'
 
 type Outcome = 'solved' | 'stopped' | 'finished' | null
+export type GuidedProgress = { index: number; completed: number[]; awaitingOutcome: boolean; outcome: Outcome }
 
-export default function GuidedChecks({ steps, difficulty, professionalAdvice }: {steps: string[]; difficulty: string; professionalAdvice: string}) {
-  const [index, setIndex] = useState(0)
-  const [completed, setCompleted] = useState<number[]>([])
-  const [awaitingOutcome, setAwaitingOutcome] = useState(false)
-  const [outcome, setOutcome] = useState<Outcome>(null)
+export default function GuidedChecks({ steps, difficulty, professionalAdvice, initialProgress, onProgress }: {steps: string[]; difficulty: string; professionalAdvice: string; initialProgress?: GuidedProgress | null; onProgress?: (progress: GuidedProgress) => void}) {
+  const initial = initialProgress && Number.isInteger(initialProgress.index) && initialProgress.index >= 0 && initialProgress.index < steps.length && Array.isArray(initialProgress.completed) ? initialProgress : null
+  const [index, setIndex] = useState(initial?.index ?? 0)
+  const [completed, setCompleted] = useState<number[]>(initial?.completed ?? [])
+  const [awaitingOutcome, setAwaitingOutcome] = useState(initial?.awaitingOutcome ?? false)
+  const [outcome, setOutcome] = useState<Outcome>(initial?.outcome ?? null)
+  useEffect(() => { onProgress?.({ index, completed, awaitingOutcome, outcome }) }, [index, completed, awaitingOutcome, outcome])
   if (difficulty === 'professional') return <div className="guided-card"><h3>Professional help recommended</h3><p>Do not continue with checks if the situation may be dangerous. {professionalAdvice}</p></div>
   if (!steps.length) return <div className="guided-card"><h3>No checks available</h3><p>No safe basic checks were suggested. {professionalAdvice}</p></div>
   function next() { setAwaitingOutcome(false); if (index + 1 === steps.length) setOutcome('finished'); else setIndex(index + 1) }

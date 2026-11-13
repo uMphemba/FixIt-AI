@@ -8,4 +8,7 @@ public class TroubleshootingSession
     public string? Model { get; set; }
     public string ProblemDescription { get; set; } = "";
     public DateTime CreatedAt { get; set; }
+    public string? OwnerId { get; set; }
+    public string? DiagnosticResultJson { get; set; }
+    public string? ProgressJson { get; set; }
 }
